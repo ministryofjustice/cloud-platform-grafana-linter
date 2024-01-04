@@ -1,4 +1,4 @@
-project_name: uid
+project_name: grafana_linter
 env:
   - CGO_ENABLED=0
   - DOCKERFILE=Dockerfile
@@ -6,8 +6,8 @@ before:
   hooks:
     - go mod download
 builds:
-  - dir: uid
-    binary: uid
+  - dir: cloud-platform-grafana-linter
+    binary: grafana_linter
     goos:
       - linux
       - darwin

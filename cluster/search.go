@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ministryofjustice/cloud-platform-grafana-linter/uid/utils"
+	utils "github.com/ministryofjustice/cloud-platform-grafana-linter/utils"
 
 	v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
