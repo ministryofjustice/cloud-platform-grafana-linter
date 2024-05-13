@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/google/go-github/v57/github"
+	"github.com/google/go-github/v62/github"
 )
 
 func ExtractJsonFromPullRequestFile(files []*github.CommitFile) (string, error) {

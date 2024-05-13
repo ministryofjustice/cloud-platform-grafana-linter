@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/google/go-github/v57/github"
+	"github.com/google/go-github/v62/github"
 	"golang.org/x/oauth2"
 )
 
@@ -12,7 +12,7 @@ var (
 	token = os.Getenv("GITHUB_TOKEN")
 )
 
-func Client() (*github.Client, context.Context) {
+func GitHubClient() (*github.Client, context.Context) {
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},

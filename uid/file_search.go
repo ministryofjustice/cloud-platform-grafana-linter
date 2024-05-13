@@ -3,14 +3,15 @@ package uid
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
-	"github.com/google/go-github/v57/github"
+	"github.com/google/go-github/v62/github"
 )
 
 var (
-	owner = "jackstockley89"
-	repo  = "cloud-platform-environments"
+	owner = os.Getenv("REPO_OWNER")
+	repo  = os.Getenv("REPO_NAME")
 )
 
 // ListFiles retrieves a list of commit files for each pull request in a GitHub repository.

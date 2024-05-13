@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	uc "github.com/ministryofjustice/cloud-platform-grafana-linter/cluster"
 	l "github.com/ministryofjustice/cloud-platform-grafana-linter/linter"
@@ -11,11 +12,18 @@ import (
 )
 
 var (
-	pull = 0
+	p = os.Getenv("PULL_REQUEST_NUMBER")
 )
 
 func main() {
-	client, ctx := u.Client()
+	client, ctx := u.GitHubClient()
+
+	// convert pull output to int value
+	pull, err := strconv.Atoi(p)
+	if err != nil {
+		fmt.Printf("Error converting pull request number to int: %v\n", err)
+		os.Exit(1)
+	}
 
 	files, err := uid.ListFiles(client, ctx, pull)
 	if err != nil {

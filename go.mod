@@ -3,7 +3,7 @@ module github.com/ministryofjustice/cloud-platform-grafana-linter
 go 1.21.5
 
 require (
-	github.com/google/go-github/v57 v57.0.0
+	github.com/google/go-github/v62 v62.0.0
 	github.com/gophercloud/utils v0.0.0-20231010081019-80377eca5d56
 	golang.org/x/oauth2 v0.15.0
 	k8s.io/api v0.29.0
