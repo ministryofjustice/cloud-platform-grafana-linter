@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/google/go-github/v62/github"
@@ -41,4 +42,21 @@ func SelectFile(pull int, files []*github.CommitFile) (*github.CommitFile, error
 		}
 	}
 	return nil, fmt.Errorf("error: file not found in PR: %d", pull)
+}
+
+// GetCommitID will get the commit id for a pull request
+func GetPullRequestNumber(client *github.Client, owner, repo, githubref string) (int, error) {
+	// get pr owner
+	githubrefS := strings.Split(githubref, "/")
+	branch := githubrefS[2]
+	bid, _ := strconv.Atoi(branch)
+
+	prs, _, err := client.PullRequests.Get(context.Background(), owner, repo, bid)
+	if err != nil {
+		return 0, fmt.Errorf("error: getting pull request: %v", err)
+	}
+
+	prn := prs.GetNumber()
+
+	return prn, nil
 }
