@@ -9,8 +9,14 @@ import (
 	u "github.com/ministryofjustice/cloud-platform-grafana-linter/utils"
 )
 
+type Config struct {
+	Owner               string
+	Repo                string
+	Token               string
+	PULL_REQUEST_NUMBER int
+}
+
 var (
-	p     = os.Getenv("PULL_REQUEST_NUMBER")
 	token = os.Getenv("GITHUB_TOKEN")
 	owner = os.Getenv("GITHUB_OWNER")
 	repo  = os.Getenv("GITHUB_REPO")
@@ -20,10 +26,9 @@ var (
 func main() {
 	client, ctx := u.GitHubClient(token)
 
-	// convert pull output to int value
-	pull, err := strconv.Atoi(p)
+	pull, err := strconv.Atoi(os.Getenv("PULL_REQUEST_NUMBER"))
 	if err != nil {
-		fmt.Printf("Error converting pull request number to int: %v\n", err)
+		fmt.Printf("Error converting PULL_REQUEST_NUMBER to int: %v\n", err)
 		os.Exit(1)
 	}
 
