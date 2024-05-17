@@ -6,8 +6,7 @@ before:
   hooks:
     - go mod download
 builds:
-  - dir: cloud-platform-grafana-linter
-    main: cloud-platform-grafana-linter/main.go
+  - main: main.go
     binary: grafana_linter
     goos:
       - linux
