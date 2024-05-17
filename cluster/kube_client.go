@@ -4,16 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gophercloud/utils/env"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-var (
-	kubeConfigPath = env.Getenv("KUBE_CONFIG")
-)
-
-func ClientSet() *kubernetes.Clientset {
+func ClientSet(kubeConfigPath string) *kubernetes.Clientset {
 	kubeConfig, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
 	if err != nil {
 		fmt.Printf("Error getting kubernetes config: %v\n", err)
