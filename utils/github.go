@@ -9,8 +9,11 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func GitHubClient(token string) (*github.Client, context.Context) {
-	ctx := context.Background()
+var (
+	ctx = context.Background()
+)
+
+func GitHubClient(token string) *github.Client {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -18,19 +21,20 @@ func GitHubClient(token string) (*github.Client, context.Context) {
 
 	client := github.NewClient(tc)
 
-	return client, ctx
+	return client
 }
 
 // ListFiles retrieves a list of commit files for each pull request in a GitHub repository.
 // It takes a GitHub client and a context as input parameters.
 // It returns a slice of commit files, and an error if any.
-func ListFiles(owner, repo string, client *github.Client, ctx context.Context, pull int) ([]*github.CommitFile, error) {
-	files, _, err := client.PullRequests.ListFiles(ctx, owner, repo, pull, nil)
+func GetPullRequestFiles(token, o, r string, n int) ([]*github.CommitFile, *github.Response, error) {
+	client := GitHubClient(token)
+	files, resp, err := client.PullRequests.ListFiles(ctx, o, r, n, nil)
 	if err != nil {
-		error := fmt.Errorf("error: listing files: %v", err)
-		return nil, error
+		return nil, nil, fmt.Errorf("error fetching files: %w", err)
 	}
-	return files, nil
+
+	return files, resp, err
 }
 
 func SelectFile(pull int, files []*github.CommitFile) (*github.CommitFile, error) {

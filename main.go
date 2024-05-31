@@ -24,8 +24,6 @@ var (
 )
 
 func main() {
-	client, ctx := u.GitHubClient(token)
-
 	githubrefS := strings.Split(ref, "/")
 	prnum := githubrefS[2]
 	pull, _ := strconv.Atoi(prnum)
@@ -34,9 +32,9 @@ func main() {
 	owner := repoS[0]
 	repoName := repoS[1]
 
-	files, err := u.ListFiles(owner, repoName, client, ctx, pull)
+	files, _, err := u.GetPullRequestFiles(token, owner, repoName, pull)
 	if err != nil {
-		fmt.Printf("Error listing files: %v\n", err)
+		fmt.Printf("Error fetching files: %v\n", err)
 		os.Exit(1)
 	}
 
