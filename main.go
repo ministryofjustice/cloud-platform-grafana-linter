@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 
 	l "github.com/ministryofjustice/cloud-platform-grafana-linter/linter"
 	u "github.com/ministryofjustice/cloud-platform-grafana-linter/utils"
@@ -16,19 +18,23 @@ type Config struct {
 }
 
 var (
-	githubref = os.Getenv("GITHUB_REF")
-	token     = os.Getenv("GITHUB_TOKEN")
-	owner     = os.Getenv("GITHUB_OWNER")
-	repo      = os.Getenv("GITHUB_REPO")
-	// kubeConfigPath = os.Getenv("KUBE_CONFIG_PATH")
+	token = os.Getenv("GITHUB_TOKEN")
+	ref   = os.Getenv("GITHUB_REF")
+	repo  = os.Getenv("GITHUB_REPOSITORY")
 )
 
 func main() {
 	client, ctx := u.GitHubClient(token)
 
-	pull, err := u.GetPullRequestNumber(client, owner, repo, githubref)
+	githubrefS := strings.Split(ref, "/")
+	prnum := githubrefS[2]
+	pull, _ := strconv.Atoi(prnum)
 
-	files, err := u.ListFiles(owner, repo, client, ctx, pull)
+	repoS := strings.Split(repo, "/")
+	owner := repoS[0]
+	repoName := repoS[1]
+
+	files, err := u.ListFiles(owner, repoName, client, ctx, pull)
 	if err != nil {
 		fmt.Printf("Error listing files: %v\n", err)
 		os.Exit(1)
