@@ -1,14 +1,15 @@
 module github.com/ministryofjustice/cloud-platform-grafana-linter
 
 go 1.21.5
+toolchain go1.22.3
 
 require (
 	github.com/google/go-github/v62 v62.0.0
 	github.com/grafana/dashboard-linter v0.0.0-20240509155641-0e96847a2e2c
 	golang.org/x/oauth2 v0.19.0
-	k8s.io/api v0.29.3
-	k8s.io/apimachinery v0.29.3
-	k8s.io/client-go v0.29.3
+	k8s.io/api v0.30.1
+	k8s.io/apimachinery v0.30.1
+	k8s.io/client-go v0.30.1
 )
 
 require (
