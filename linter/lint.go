@@ -19,6 +19,7 @@ var (
 
 func ExtractJsonFromYamlFile(file *github.CommitFile) (bool, *lint.ResultSet, error) {
 	fileName := file.Filename
+	fmt.Println(fileName)
 	exec.Command("sh", "-c", "yq e '.data[]'"+*fileName+"> dashboard.json").Run()
 
 	results, err := lintJsonFile(*fileName)
