@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v62/github"
-	"golang.org/x/oauth2"
 )
 
 var (
@@ -14,13 +13,7 @@ var (
 )
 
 func GitHubClient(token string) *github.Client {
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
-	)
-	tc := oauth2.NewClient(ctx, ts)
-
-	client := github.NewClient(tc)
-
+	client := github.NewClient(nil).WithAuthToken(token)
 	return client
 }
 
