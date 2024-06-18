@@ -32,11 +32,15 @@ func main() {
 	owner := repoS[0]
 	repoName := repoS[1]
 
-	files, _, err := u.GetPullRequestFiles(token, owner, repoName, pull)
+	client := u.GitHubClient(token)
+
+	files, _, err := u.GetPullRequestFiles(client, owner, repoName, pull)
 	if err != nil {
 		fmt.Printf("Error fetching files: %v\n", err)
 		os.Exit(1)
 	}
+
+	fmt.Println("GetPullRequestFiles: Done")
 
 	file, err := u.SelectFile(pull, files)
 	if err != nil {
@@ -44,11 +48,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Println("SelectFile: Done")
+
 	b, results, err := l.ExtractJsonFromYamlFile(file)
 	if err != nil {
 		fmt.Printf("Error extracting json from yaml file: %v\n", err)
 		os.Exit(1)
 	}
+
+	fmt.Println("ExtractJsonFromYamlFile: Done")
 
 	if b {
 		results.ReportByRule()
