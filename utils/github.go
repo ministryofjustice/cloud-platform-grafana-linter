@@ -16,7 +16,7 @@ var (
 func GitHubClient(token string) *github.Client {
 	client := github.NewClient(nil).WithAuthToken(token)
 
-	user, resp, err := client.Users.Get(ctx, "")
+	_, resp, err := client.Users.Get(ctx, "")
 	if err != nil {
 		fmt.Printf("\nerror: %v\n", err)
 		return nil
@@ -29,8 +29,6 @@ func GitHubClient(token string) *github.Client {
 	if !resp.TokenExpiration.IsZero() {
 		log.Printf("Token Expiration: %v\n", resp.TokenExpiration)
 	}
-
-	fmt.Printf("\n%v\n", github.Stringify(user))
 
 	return client
 }

@@ -18,7 +18,7 @@ type Config struct {
 }
 
 var (
-	token = os.Getenv("GITHUB_TOKEN")
+	token = os.Getenv("AUTH_TOKEN")
 	ref   = os.Getenv("GITHUB_REF")
 	repo  = os.Getenv("GITHUB_REPOSITORY")
 )
