@@ -18,9 +18,8 @@ var (
 )
 
 func ExtractJsonFromYamlFile(file *github.CommitFile) error {
-	// fileName := file.Filename
-	fileName := "namespaces/live.cloud-platform.service.justice.gov.uk/monitoring/dashboard-api-server.yaml"
-	exec.Command("sh", "-c", "yq e '.data[]' "+fileName+" > dashboard.json").Run()
+	fileName := file.Filename
+	exec.Command("sh", "-c", "yq e '.data[]' "+*fileName+" > dashboard.json").Run()
 	// check last command's exit status and if file was created
 	if _, err := os.Stat("dashboard.json"); os.IsNotExist(err) {
 		return fmt.Errorf("failed to create dashboard.json")
