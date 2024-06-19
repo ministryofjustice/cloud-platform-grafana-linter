@@ -17,20 +17,18 @@ var (
 	lintStrictFlag  bool
 )
 
-func ExtractJsonFromYamlFile(file *github.CommitFile) (bool, *lint.ResultSet, error) {
+func ExtractJsonFromYamlFile(file *github.CommitFile) error {
 	fileName := file.Filename
 	fmt.Println(*fileName)
 	exec.Command("sh", "-c", "yq e '.data[]'"+*fileName+"> dashboard.json").Run()
-
-	results, err := lintJsonFile(*fileName)
-	if err != nil {
-		return false, nil, err
+	// check last command's exit status and if file was created
+	if _, err := os.Stat("dashboard.json"); os.IsNotExist(err) {
+		return fmt.Errorf("failed to create dashboard.json")
 	}
-	return true, results, nil
-
+	return nil
 }
 
-func lintJsonFile(filename string) (*lint.ResultSet, error) {
+func LintJsonFile(filename string) (*lint.ResultSet, error) {
 	buf, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %v", err)
