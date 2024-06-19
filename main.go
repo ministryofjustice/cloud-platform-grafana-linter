@@ -37,28 +37,27 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("GetPullRequestFiles: Done")
-
 	file, err := u.SelectFile(pull, files)
 	if err != nil {
 		fmt.Printf("Error selecting file: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Println("SelectFile: Done")
+	l.ExtractJsonFromYamlFile(file)
+	if err != nil {
+		fmt.Printf("Error extracting json from yaml file: %v\n", err)
+		os.Exit(1)
+	}
 
 	switch check {
 	case "linter":
 		fmt.Println("Running linter check")
-		b, results, err := l.ExtractJsonFromYamlFile(file)
+		results, err := l.LintJsonFile("dashboard.json")
 		if err != nil {
-			fmt.Printf("Error extracting json from yaml file: %v\n", err)
+			fmt.Printf("Error linting json file: %v\n", err)
 			os.Exit(1)
 		}
-
-		fmt.Println("ExtractJsonFromYamlFile: Done")
-
-		if b {
+		if results != nil {
 			results.ReportByRule()
 		}
 	case "validator":
@@ -67,15 +66,12 @@ func main() {
 
 	case "both":
 		fmt.Println("Running both linter and validator checks")
-		b, results, err := l.ExtractJsonFromYamlFile(file)
+		results, err := l.LintJsonFile("dashboard.json")
 		if err != nil {
-			fmt.Printf("Error extracting json from yaml file: %v\n", err)
+			fmt.Printf("Error linting json file: %v\n", err)
 			os.Exit(1)
 		}
-
-		fmt.Println("ExtractJsonFromYamlFile: Done")
-
-		if b {
+		if results != nil {
 			results.ReportByRule()
 		}
 		// TODO: Implement validator check here for UID
