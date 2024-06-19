@@ -49,6 +49,7 @@ func SelectFile(pull int, files []*github.CommitFile) (*github.CommitFile, error
 	for _, file := range files {
 		fmt.Println("File:", *file.Filename)
 		if strings.Contains(*file.Filename, "dashboard") {
+			fmt.Println("File:", file)
 			return file, nil
 		}
 	}
