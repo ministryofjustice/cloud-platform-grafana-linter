@@ -12,24 +12,24 @@ import (
 )
 
 var (
-	token = flag.String(os.Getenv("AUTH_TOKEN"), "token", "GitHub token used for authentication")
-	ref   = flag.String(os.Getenv("GITHUB_REF"), "ref", "GitHub pull request ref (e.g. refs/pull/1/head)")
-	repo  = flag.String(os.Getenv("GITHUB_REPOSITORY"), "repo", "GitHub repository (e.g. owner/repository)")
-	check = flag.String(os.Getenv("CHECK"), "check", "Check for selecting linter or validator")
+	token = os.Getenv("AUTH_TOKEN")
+	ref   = os.Getenv("GITHUB_REF")
+	repo  = os.Getenv("GITHUB_REPOSITORY")
+	check = os.Getenv("CHECK")
 )
 
 func main() {
 	flag.Parse()
 
-	githubrefS := strings.Split(*ref, "/")
+	githubrefS := strings.Split(ref, "/")
 	prnum := githubrefS[2]
 	pull, _ := strconv.Atoi(prnum)
 
-	repoS := strings.Split(*repo, "/")
+	repoS := strings.Split(repo, "/")
 	owner := repoS[0]
 	repoName := repoS[1]
 
-	client := u.GitHubClient(*token)
+	client := u.GitHubClient(token)
 
 	files, _, err := u.GetPullRequestFiles(client, owner, repoName, pull)
 	if err != nil {
@@ -47,7 +47,9 @@ func main() {
 
 	fmt.Println("SelectFile: Done")
 
-	if *check == "linter" {
+	switch check {
+	case "linter":
+		fmt.Println("Running linter check")
 		b, results, err := l.ExtractJsonFromYamlFile(file)
 		if err != nil {
 			fmt.Printf("Error extracting json from yaml file: %v\n", err)
@@ -59,10 +61,26 @@ func main() {
 		if b {
 			results.ReportByRule()
 		}
-	}
-
-	if *check == "validator" {
+	case "validator":
+		fmt.Println("Running validator check")
 		// TODO: Implement validator check here for UID
-		fmt.Println("Validator check not implemented yet")
+
+	case "both":
+		fmt.Println("Running both linter and validator checks")
+		b, results, err := l.ExtractJsonFromYamlFile(file)
+		if err != nil {
+			fmt.Printf("Error extracting json from yaml file: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Println("ExtractJsonFromYamlFile: Done")
+
+		if b {
+			results.ReportByRule()
+		}
+		// TODO: Implement validator check here for UID
+	default:
+		fmt.Println("Invalid check type")
+		os.Exit(1)
 	}
 }
