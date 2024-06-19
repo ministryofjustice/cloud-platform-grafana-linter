@@ -58,6 +58,7 @@ func main() {
 			os.Exit(1)
 		}
 		if results != nil {
+			fmt.Println("\nResults:")
 			results.ReportByRule()
 		}
 	case "validator":
@@ -72,6 +73,7 @@ func main() {
 			os.Exit(1)
 		}
 		if results != nil {
+			fmt.Println("\nResults:")
 			results.ReportByRule()
 		}
 		// TODO: Implement validator check here for UID
