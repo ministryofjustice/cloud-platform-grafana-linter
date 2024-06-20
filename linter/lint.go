@@ -24,6 +24,7 @@ func ExtractJsonFromYamlFile(file *github.CommitFile) error {
 	if _, err := os.Stat("dashboard.json"); os.IsNotExist(err) {
 		return fmt.Errorf("failed to create dashboard.json")
 	}
+	exec.Command("sh", "-c", "echo 'dashboard.json'").Run()
 	return nil
 }
 

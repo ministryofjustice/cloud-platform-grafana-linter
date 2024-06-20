@@ -47,9 +47,8 @@ func GetPullRequestFiles(client *github.Client, o, r string, n int) ([]*github.C
 
 func SelectFile(pull int, files []*github.CommitFile) (*github.CommitFile, error) {
 	for _, file := range files {
-		fmt.Println("File:", *file.Filename)
 		if strings.Contains(*file.Filename, "dashboard") {
-			fmt.Println("File:", file)
+			fmt.Println("File:", file.GetFilename())
 			return file, nil
 		}
 	}
