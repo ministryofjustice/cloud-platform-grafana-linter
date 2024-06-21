@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/google/go-github/v62/github"
@@ -53,4 +54,24 @@ func SelectFile(pull int, files []*github.CommitFile) (*github.CommitFile, error
 		}
 	}
 	return nil, fmt.Errorf("error: file not found in PR: %d", pull)
+}
+
+func GetFileContent(client *github.Client, file *github.CommitFile, owner, repo string) error {
+	content, _, _, err := client.Repositories.GetContents(ctx, owner, repo, *file.Filename, nil)
+	if err != nil {
+		return fmt.Errorf("failed to get file content: %v", err)
+	}
+
+	decodedContent, err := content.GetContent()
+	if err != nil {
+		return fmt.Errorf("failed to decode content: %v", err)
+	}
+
+	os.OpenFile("dashboard.yaml", os.O_RDWR|os.O_CREATE, 0755)
+	err = os.WriteFile("dashboard.yaml", []byte(decodedContent), 0755)
+	if err != nil {
+		return fmt.Errorf("failed to write file: %v", err)
+	}
+
+	return nil
 }

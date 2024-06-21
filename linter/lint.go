@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"path"
 
-	"github.com/google/go-github/v62/github"
 	"github.com/grafana/dashboard-linter/lint"
 )
 
@@ -17,14 +16,12 @@ var (
 	lintStrictFlag  bool
 )
 
-func ExtractJsonFromYamlFile(file *github.CommitFile) error {
-	fileName := file.Filename
-	exec.Command("sh", "-c", "yq e '.data[]' "+*fileName+" > dashboard.json").Run()
+func ExtractJsonFromYamlFile() error {
+	exec.Command("sh", "-c", "yq e '.data[]' dashboard.yaml > dashboard.json").Run()
 	// check last command's exit status and if file was created
 	if _, err := os.Stat("dashboard.json"); os.IsNotExist(err) {
 		return fmt.Errorf("failed to create dashboard.json")
 	}
-	exec.Command("sh", "-c", "echo 'dashboard.json'").Run()
 	return nil
 }
 

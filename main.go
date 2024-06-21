@@ -43,7 +43,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	l.ExtractJsonFromYamlFile(file)
+	u.GetFileContent(client, file, owner, repoName)
+	if err != nil {
+		fmt.Printf("Error getting file content: %v\n", err)
+		os.Exit(1)
+	}
+
+	l.ExtractJsonFromYamlFile()
 	if err != nil {
 		fmt.Printf("Error extracting json from yaml file: %v\n", err)
 		os.Exit(1)
