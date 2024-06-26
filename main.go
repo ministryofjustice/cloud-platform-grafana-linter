@@ -7,20 +7,67 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/martian/log"
 	l "github.com/ministryofjustice/cloud-platform-grafana-linter/linter"
 	u "github.com/ministryofjustice/cloud-platform-grafana-linter/utils"
+	githubactions "github.com/sethvargo/go-githubactions"
 )
 
 var (
-	token = os.Getenv("AUTH_TOKEN")
-	ref   = os.Getenv("GITHUB_REF")
-	repo  = os.Getenv("GITHUB_REPOSITORY")
-	check = os.Getenv("CHECK")
+	token          = os.Getenv("AUTH_TOKEN")
+	ref            = os.Getenv("GITHUB_REF")
+	repo           = os.Getenv("GITHUB_REPOSITORY")
+	kubeConfigPath = os.Getenv("KUBE_CONFIG_PATH")
+	prf            *u.YAML
+	json           *u.JSON
+	configMaps     *u.ConfigMaps
+	uids           []string
 )
 
 func main() {
 	flag.Parse()
 
+	// chech env vars are set
+	if token == "" {
+		log.Errorf("AUTH_TOKEN is not set")
+	}
+
+	if ref == "" {
+		log.Errorf("GITHUB_REF is not set")
+	}
+
+	if repo == "" {
+		log.Errorf("GITHUB_REPOSITORY is not set")
+	}
+
+	if kubeConfigPath == "" {
+		log.Errorf("KUBE_CONFIG_PATH is not set")
+	}
+
+	// gather config maps from all namespaces with label grafana_dashboard
+	kube_client := u.ClientSet(kubeConfigPath)
+
+	configList, err := u.NamespaceConfigMaps(kube_client)
+	if err != nil {
+		log.Errorf("Error fetching config maps: %v\n", err)
+	}
+
+	for _, configMap := range configList {
+		for _, items := range configMap.Items {
+			for _, value := range items.Data {
+				cm, err := u.ExtractJson(value, "uid")
+				if err != nil {
+					fmt.Printf("Error extracting json: %v\n", err)
+				}
+				configMaps, _ = cm.(*u.ConfigMaps)
+
+				// create an array of configMaps.UID
+				uids = []string{configMaps.UID}
+			}
+		}
+	}
+
+	// get pull request files
 	githubrefS := strings.Split(ref, "/")
 	prnum := githubrefS[2]
 	pull, _ := strconv.Atoi(prnum)
@@ -33,58 +80,62 @@ func main() {
 
 	files, _, err := u.GetPullRequestFiles(client, owner, repoName, pull)
 	if err != nil {
-		fmt.Printf("Error fetching files: %v\n", err)
-		os.Exit(1)
+		log.Errorf("Error fetching pull request files: %v\n", err)
 	}
 
-	file, err := u.SelectFile(pull, files)
-	if err != nil {
-		fmt.Printf("Error selecting file: %v\n", err)
-		os.Exit(1)
-	}
+	for _, file := range files {
+		if u.SelectFile(pull, file) != nil {
+			decodeContent, err := u.GetFileContent(client, file, owner, repoName)
+			if err != nil {
+				log.Errorf("Error fetching file content: %v\n", err)
+			}
 
-	u.GetFileContent(client, file, owner, repoName)
-	if err != nil {
-		fmt.Printf("Error getting file content: %v\n", err)
-		os.Exit(1)
-	}
+			prf, err = u.ExtractYaml(decodeContent)
+			if err != nil {
+				log.Errorf("Error extracting yaml: %v\n", err)
+			}
 
-	l.ExtractJsonFromYamlFile()
-	if err != nil {
-		fmt.Printf("Error extracting json from yaml file: %v\n", err)
-		os.Exit(1)
-	}
+			for _, v := range prf.Data {
+				j, err := u.ExtractJson(v, "linter")
+				if err != nil {
+					log.Errorf("Error extracting json: %v\n", err)
+				}
+				json, _ = j.(*u.JSON)
+				fmt.Println("UID: ", json.UID)
 
-	switch check {
-	case "linter":
-		fmt.Println("Running linter check")
-		results, err := l.LintJsonFile("dashboard.json")
-		if err != nil {
-			fmt.Printf("Error linting json file: %v\n", err)
-			os.Exit(1)
+				for _, uid := range uids {
+					if uid == json.UID {
+						log.Infof("UID exists in cluster")
+						// github output for actions
+						githubactions.New().SetOutput("uid_exists", "true")
+						githubactions.New().SetOutput("uid_message", "UID: "+json.UID+" already exists in cluster")
+						os.Exit(0)
+					} else {
+						fmt.Println("UID does not exist in cluster")
+					}
+				}
+			}
+
+			fmt.Printf("\nTitle: %s\n", prf.Metadata.Name)
+			fmt.Printf("Namespace: %s\n", prf.Metadata.Namespace)
+
+			// print data interface
+			for k, v := range prf.Data {
+				results, err := l.LintJsonFile(k, []byte(v.(string)))
+				if err != nil {
+					log.Errorf("Error linting json file: %v\n", err)
+				}
+
+				results.ReportByRule()
+
+				githubactions.New().SetOutput("uid_exists", "false")
+				githubactions.New().SetOutput("uid_message", "UID: "+json.UID+" does not exist in cluster")
+
+			}
+
+		} else {
+			continue
 		}
-		if results != nil {
-			fmt.Println("\nResults:")
-			results.ReportByRule()
-		}
-	case "validator":
-		fmt.Println("Running validator check")
-		// TODO: Implement validator check here for UID
-
-	case "both":
-		fmt.Println("Running both linter and validator checks")
-		results, err := l.LintJsonFile("dashboard.json")
-		if err != nil {
-			fmt.Printf("Error linting json file: %v\n", err)
-			os.Exit(1)
-		}
-		if results != nil {
-			fmt.Println("\nResults:")
-			results.ReportByRule()
-		}
-		// TODO: Implement validator check here for UID
-	default:
-		fmt.Println("Invalid check type")
-		os.Exit(1)
 	}
+
 }

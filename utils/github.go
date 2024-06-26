@@ -1,17 +1,11 @@
 package utils
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/google/go-github/v62/github"
-)
-
-var (
-	ctx = context.Background()
 )
 
 func GitHubClient(token string) *github.Client {
@@ -46,32 +40,26 @@ func GetPullRequestFiles(client *github.Client, o, r string, n int) ([]*github.C
 	return files, resp, err
 }
 
-func SelectFile(pull int, files []*github.CommitFile) (*github.CommitFile, error) {
-	for _, file := range files {
-		if strings.Contains(*file.Filename, "dashboard") {
-			fmt.Println("File:", file.GetFilename())
-			return file, nil
-		}
+func SelectFile(pull int, file *github.CommitFile) *github.CommitFile {
+	// file filename contains dashboard in the name return file
+	if strings.Contains(*file.Filename, "dashboard") {
+		return file
 	}
-	return nil, fmt.Errorf("error: file not found in PR: %d", pull)
+	return nil
 }
 
-func GetFileContent(client *github.Client, file *github.CommitFile, owner, repo string) error {
+func GetFileContent(client *github.Client, file *github.CommitFile, owner, repo string) (string, error) {
 	content, _, _, err := client.Repositories.GetContents(ctx, owner, repo, *file.Filename, nil)
 	if err != nil {
-		return fmt.Errorf("failed to get file content: %v", err)
+		fmt.Printf("Error fetching file content: %v\n", err)
+		return "", err
 	}
 
-	decodedContent, err := content.GetContent()
+	decodeContent, err := content.GetContent()
 	if err != nil {
-		return fmt.Errorf("failed to decode content: %v", err)
+		fmt.Printf("Error decoding file content: %v\n", err)
+		return "", err
 	}
 
-	os.OpenFile("dashboard.yaml", os.O_RDWR|os.O_CREATE, 0755)
-	err = os.WriteFile("dashboard.yaml", []byte(decodedContent), 0755)
-	if err != nil {
-		return fmt.Errorf("failed to write file: %v", err)
-	}
-
-	return nil
+	return decodeContent, nil
 }

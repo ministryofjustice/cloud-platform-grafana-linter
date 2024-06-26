@@ -2,9 +2,6 @@ package linter
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
-	"path"
 
 	"github.com/grafana/dashboard-linter/lint"
 )
@@ -16,29 +13,10 @@ var (
 	lintStrictFlag  bool
 )
 
-func ExtractJsonFromYamlFile() error {
-	exec.Command("sh", "-c", "yq e '.data[]' dashboard.yaml > dashboard.json").Run()
-	// check last command's exit status and if file was created
-	if _, err := os.Stat("dashboard.json"); os.IsNotExist(err) {
-		return fmt.Errorf("failed to create dashboard.json")
-	}
-	return nil
-}
-
-func LintJsonFile(filename string) (*lint.ResultSet, error) {
-	buf, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %v", err)
-	}
-
-	dashboard, err := lint.NewDashboard(buf)
+func LintJsonFile(key string, value []byte) (*lint.ResultSet, error) {
+	dashboard, err := lint.NewDashboard(value)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse dashboard: %v", err)
-	}
-
-	// if no config flag was passed, set a default path of a .lint file in the dashboards directory
-	if lintConfigFlag == "" {
-		lintConfigFlag = path.Join(path.Dir(filename), ".lint")
 	}
 
 	config := lint.NewConfigurationFile()
@@ -57,7 +35,7 @@ func LintJsonFile(filename string) (*lint.ResultSet, error) {
 	if config.Autofix {
 		changes := results.AutoFix(&dashboard)
 		if changes > 0 {
-			_, err = fmt.Println(dashboard, filename, buf)
+			_, err = fmt.Println(dashboard, key, value)
 			if err != nil {
 				return nil, fmt.Errorf("failed to write dashboard: %v", err)
 			}
