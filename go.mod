@@ -6,7 +6,7 @@ require (
 	github.com/google/go-github/v62 v62.0.0
 	github.com/google/martian v2.1.0+incompatible
 	github.com/grafana/dashboard-linter v0.0.0-20240509155641-0e96847a2e2c
-	github.com/sethvargo/go-githubactions v1.2.0
+	github.com/sethvargo/go-githubactions v1.3.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.29.3
 	k8s.io/apimachinery v0.29.3
