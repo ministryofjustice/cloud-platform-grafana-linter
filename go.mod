@@ -9,9 +9,8 @@ require (
 	github.com/grafana/dashboard-linter v0.0.0-20240509155641-0e96847a2e2c
 	github.com/sethvargo/go-githubactions v1.2.0
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.29.3
+	k8s.io/api v0.31.2
 	k8s.io/apimachinery v0.31.2
-	k8s.io/client-go v0.29.3
 )
 
 require (
@@ -30,6 +29,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -50,7 +50,7 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/net v0.26.0 // indirect
-	golang.org/x/oauth2 v0.19.0 // indirect
+	golang.org/x/oauth2 v0.21.0 // indirect
 	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/term v0.21.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
